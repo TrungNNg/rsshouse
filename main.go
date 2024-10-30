@@ -32,6 +32,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", cfg.HomeHandler)
+	mux.HandleFunc("POST /api/signup", cfg.SignUp)
+	mux.HandleFunc("POST /api/login", cfg.Login)
+	mux.HandleFunc("POST /api/logout", cfg.Logout)
+	mux.HandleFunc("GET /api/reset", cfg.ResetUsers)
 
 	server := &http.Server{
 		Addr:    ":" + port,
