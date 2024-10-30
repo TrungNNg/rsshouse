@@ -1,12 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/TrungNNg/rsshouse/api"
+	"github.com/TrungNNg/rsshouse/internal/database"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -16,8 +19,16 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	port := os.Getenv("PORT")
+	dbURL := os.Getenv("DB_URL")
 
-	cfg := api.ApiConfig{}
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cfg := api.ApiConfig{
+		DB: database.New(db),
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", cfg.HomeHandler)
