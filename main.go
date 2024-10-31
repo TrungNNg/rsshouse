@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/TrungNNg/rsshouse/api"
 	"github.com/TrungNNg/rsshouse/internal/database"
+	"github.com/TrungNNg/rsshouse/jobs"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -48,6 +50,10 @@ func main() {
 		Handler: mux,
 	}
 
+	// a background task that clean up expired or revoked refresh token
+	go jobs.CleanUpRefreshToken(&cfg, time.Hour*12)
+
+	// start the server
 	log.Println("Starting server on :" + port)
 	log.Fatal(server.ListenAndServe())
 }

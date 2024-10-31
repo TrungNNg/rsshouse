@@ -12,6 +12,16 @@ import (
 	"github.com/google/uuid"
 )
 
+const cleanupExpiredOrRevokedTokens = `-- name: CleanupExpiredOrRevokedTokens :exec
+DELETE FROM refresh_tokens
+WHERE (expires_at <= $1 OR revoked_at IS NOT NULL)
+`
+
+func (q *Queries) CleanupExpiredOrRevokedTokens(ctx context.Context, expiresAt time.Time) error {
+	_, err := q.db.ExecContext(ctx, cleanupExpiredOrRevokedTokens, expiresAt)
+	return err
+}
+
 const createRefreshToken = `-- name: CreateRefreshToken :one
 INSERT INTO refresh_tokens (token, created_at, updated_at, user_id, expires_at)
 VALUES (
