@@ -37,6 +37,8 @@ func main() {
 	mux.HandleFunc("POST /api/login", cfg.Login)
 	mux.HandleFunc("POST /api/logout", cfg.Logout)
 	mux.HandleFunc("GET /api/reset", cfg.ResetUsers)
+	mux.HandleFunc("POST /api/refresh", cfg.Refresh)
+	mux.HandleFunc("POST /api/revoke", cfg.Revoke)
 
 	// authenticated enpoints
 	mux.HandleFunc("GET /api/test", cfg.Test)

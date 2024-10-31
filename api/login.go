@@ -6,8 +6,11 @@ import (
 	"time"
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
+	"github.com/TrungNNg/rsshouse/internal/database"
 )
 
+// send user access token and refresh token on success login
+// new refresh token is save in db
 func (c *ApiConfig) Login(w http.ResponseWriter, r *http.Request) {
 	reqData := struct {
 		Username string `json:"username"`
@@ -34,12 +37,38 @@ func (c *ApiConfig) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create jwt token and send to client
+	// create new jwt token and send to client
 	jwt, err := auth.MakeJWT(dbUser.ID, c.Secret, time.Hour)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Can not create token", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create token", err)
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, jwt)
+	// create new refresh token in db
+	refreshToken, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't create refresh token", err)
+		return
+	}
+
+	_, err = c.DB.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		Token:     refreshToken,
+		UserID:    dbUser.ID,
+		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't save refresh token", err)
+		return
+	}
+
+	// send access token and refresh token to client
+	resData := struct {
+		AccessToken  string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
+	}{
+		AccessToken:  jwt,
+		RefreshToken: refreshToken,
+	}
+
+	respondWithJSON(w, http.StatusOK, resData)
 }
