@@ -27,7 +27,8 @@ func main() {
 	}
 
 	cfg := api.ApiConfig{
-		DB: database.New(db),
+		DB:     database.New(db),
+		Secret: os.Getenv("SECRET"),
 	}
 
 	mux := http.NewServeMux()
@@ -36,6 +37,9 @@ func main() {
 	mux.HandleFunc("POST /api/login", cfg.Login)
 	mux.HandleFunc("POST /api/logout", cfg.Logout)
 	mux.HandleFunc("GET /api/reset", cfg.ResetUsers)
+
+	// authenticated enpoints
+	mux.HandleFunc("GET /api/test", cfg.Test)
 
 	server := &http.Server{
 		Addr:    ":" + port,

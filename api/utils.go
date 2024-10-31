@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// send the msg to client, log out err in terminal
 func respondWithError(w http.ResponseWriter, code int, msg string, err error) {
 	if err != nil {
 		log.Println(err)

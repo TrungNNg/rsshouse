@@ -27,6 +27,11 @@ func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(reqData.Username) < 2 {
+		respondWithError(w, http.StatusBadRequest, "username too short", nil)
+		return
+	}
+
 	hashedPassword, err := auth.HashPassword(reqData.Password)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Problem with password", err)
@@ -50,14 +55,7 @@ func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:      dbUser.UpdatedAt,
 		Username:       dbUser.Username,
 		HashedPassword: dbUser.HashedPassword,
-	})
+	}) //
+
 	respondWithJSON(w, http.StatusCreated, "User created")
-}
-
-func (c *ApiConfig) Login(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func (c *ApiConfig) Logout(w http.ResponseWriter, r *http.Request) {
-
 }

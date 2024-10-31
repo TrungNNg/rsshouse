@@ -11,3 +11,7 @@ RETURNING *;
 
 -- name: ResetUsers :exec
 DELETE FROM users;
+
+-- name: GetUserByUsername :one
+SELECT * FROM users
+WHERE $1 = username;
