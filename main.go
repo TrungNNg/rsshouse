@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/TrungNNg/rsshouse/api"
+	"github.com/TrungNNg/rsshouse/internal/api"
 	"github.com/TrungNNg/rsshouse/internal/database"
-	"github.com/TrungNNg/rsshouse/jobs"
+	"github.com/TrungNNg/rsshouse/internal/jobs"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -37,10 +37,9 @@ func main() {
 	mux.HandleFunc("/", cfg.HomeHandler)
 	mux.HandleFunc("POST /api/signup", cfg.SignUp)
 	mux.HandleFunc("POST /api/login", cfg.Login)
-	mux.HandleFunc("POST /api/logout", cfg.Logout)
 	mux.HandleFunc("GET /api/reset", cfg.ResetUsers)
 	mux.HandleFunc("POST /api/refresh", cfg.Refresh)
-	mux.HandleFunc("POST /api/revoke", cfg.Revoke)
+	mux.HandleFunc("POST /api/revoke", cfg.Revoke) // use this for logout
 
 	// authenticated enpoints
 	mux.HandleFunc("GET /api/test", cfg.Test)

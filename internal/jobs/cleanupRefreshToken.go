@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/TrungNNg/rsshouse/api"
+	"github.com/TrungNNg/rsshouse/internal/api"
 )
 
 func CleanUpRefreshToken(c *api.ApiConfig, interval time.Duration) {
