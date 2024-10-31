@@ -22,13 +22,9 @@ func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(reqData.Password) < 5 {
-		respondWithError(w, http.StatusBadRequest, "Password too short", nil)
-		return
-	}
-
-	if len(reqData.Username) < 2 {
-		respondWithError(w, http.StatusBadRequest, "username too short", nil)
+	err = CheckUsernameAndPassword(reqData.Username, reqData.Password)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
 
