@@ -34,7 +34,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Write(dat)
 }
 
-func CheckUsernameAndPassword(username, password string) error {
+func checkUsernameAndPassword(username, password string) error {
 	// Check username length
 	if len(username) < 2 {
 		return ErrUsernameTooShort

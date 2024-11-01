@@ -16,13 +16,14 @@ func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 	}{}
 
 	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
 	err := decoder.Decode(&reqData)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Can not decode json", err)
 		return
 	}
 
-	err = CheckUsernameAndPassword(reqData.Username, reqData.Password)
+	err = checkUsernameAndPassword(reqData.Username, reqData.Password)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error(), nil)
 		return

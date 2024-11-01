@@ -11,6 +11,21 @@ import (
 	"github.com/google/uuid"
 )
 
+type Feed struct {
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	Title         string
+	Descrip       string
+	FeedLink      string
+	UpdatedParsed time.Time
+	Lang          string
+	ImgUrl        string
+	ImgTitle      string
+	FeedType      string
+	UserID        uuid.UUID
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time

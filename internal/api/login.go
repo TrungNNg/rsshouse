@@ -17,6 +17,7 @@ func (c *ApiConfig) Login(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}{}
 	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
 	err := decoder.Decode(&reqData)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Can not decode json", err)
