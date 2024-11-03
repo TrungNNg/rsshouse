@@ -74,7 +74,7 @@ func main() {
 	mux.HandleFunc("POST /api/refresh", cfg.Refresh)
 	mux.HandleFunc("POST /api/revoke", cfg.Revoke) // use this for logout
 
-	// authenticated enpoints
+	// authenticated endpoints
 	mux.HandleFunc("GET /api/test", cfg.Test)
 	mux.HandleFunc("POST /api/feeds", cfg.AddFeed)
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -74,7 +75,7 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		if post.Image != nil {
 			postImgTitle, postImgURL = post.Image.Title, post.Image.URL
 		}
-		_ = c.DB.AddPost(r.Context(), database.AddPostParams{
+		err = c.DB.AddPost(r.Context(), database.AddPostParams{
 			ID:              uuid.New(),
 			Title:           post.Title,
 			Descrip:         post.Description,
@@ -85,5 +86,6 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 			Guid:            post.GUID,
 			FeedID:          dbFeed.ID,
 		})
+		log.Println("error adding post: ", err)
 	}
 }
