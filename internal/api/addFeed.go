@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -40,21 +39,27 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// feed.Image can be nil
+	var feedImgURL, feedImgTitle string
+	if feed.Image != nil {
+		feedImgTitle, feedImgURL = feed.Image.Title, feed.Image.URL
+	}
+
 	// save feed to db
-	_, err = c.DB.AddFeed(r.Context(), database.AddFeedParams{
+	dbFeed, err := c.DB.AddFeed(r.Context(), database.AddFeedParams{
 		ID:            uuid.New(),
 		Title:         feed.Title,
 		Descrip:       feed.Description,
 		FeedLink:      feed.FeedLink,
 		UpdatedParsed: time.Now().UTC(),
 		Lang:          feed.Language,
-		ImgUrl:        feed.Image.URL,
-		ImgTitle:      feed.Image.Title,
+		ImgUrl:        feedImgURL,
+		ImgTitle:      feedImgTitle,
 		FeedType:      feed.FeedType,
 		UserID:        userID,
 	})
 	if err != nil {
-		if strings.Contains(err.Error(), "duplicate key value violates unique constraint \"feeds_feed_link_key\"") {
+		if strings.Contains(err.Error(), `duplicate key value violates unique constraint "feeds_feed_link_key"`) {
 			respondWithError(w, http.StatusBadRequest, "This url already added :)", err)
 			return
 		}
@@ -64,6 +69,21 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 
 	// save post to db
 	for _, post := range feed.Items {
-		fmt.Println(post.Title)
+		// post.Image can be nil
+		var postImgURL, postImgTitle string
+		if post.Image != nil {
+			postImgTitle, postImgURL = post.Image.Title, post.Image.URL
+		}
+		_ = c.DB.AddPost(r.Context(), database.AddPostParams{
+			ID:              uuid.New(),
+			Title:           post.Title,
+			Descrip:         post.Description,
+			PostLink:        post.Link,
+			PublishedParsed: time.Now().UTC(),
+			ImgUrl:          postImgURL,
+			ImgTitle:        postImgTitle,
+			Guid:            post.GUID,
+			FeedID:          dbFeed.ID,
+		})
 	}
 }

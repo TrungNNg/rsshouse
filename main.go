@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -23,13 +22,23 @@ func testGoFeed() {
 	fp := gofeed.NewParser()
 	fp.UserAgent = "rsshouse"
 	feed, _ := fp.ParseURLWithContext("http://feeds.twit.tv/twit.xml", ctx)
-	fmt.Println(feed.Title)
-	fmt.Println(feed.Description)
-	fmt.Println(feed.FeedLink)
-	fmt.Println(feed.UpdatedParsed)
-	fmt.Println(feed.Language)
-	fmt.Println(feed.Image)
-	fmt.Println(feed.FeedType)
+
+	post := feed.Items[1]
+	println(post.Title)
+	println(post.Description)
+	println("Content", post.Content)
+	println("LINK:", post.Link)
+	for _, l := range post.Links {
+		println(l)
+	}
+	println("Update time: ", post.UpdatedParsed)
+	println("Publisised time: ", post.PublishedParsed)
+	for _, aut := range post.Authors {
+		println(aut.Name)
+	}
+	println("ID HERE: ", post.GUID)
+	println("IMAGE TITLE: ", post.Image.Title)
+	println("IMAGE URL: ", post.Image.URL)
 }
 
 func main() {

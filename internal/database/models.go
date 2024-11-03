@@ -26,6 +26,20 @@ type Feed struct {
 	UserID        uuid.UUID
 }
 
+type Post struct {
+	ID              uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	Title           string
+	Descrip         string
+	PostLink        string
+	PublishedParsed time.Time
+	ImgUrl          string
+	ImgTitle        string
+	Guid            string
+	FeedID          uuid.UUID
+}
+
 type RefreshToken struct {
 	Token     string
 	CreatedAt time.Time
