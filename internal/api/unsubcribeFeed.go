@@ -6,10 +6,9 @@ import (
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
 	"github.com/TrungNNg/rsshouse/internal/database"
-	"github.com/google/uuid"
 )
 
-func (c *ApiConfig) SubcribeFeed(w http.ResponseWriter, r *http.Request) {
+func (c *ApiConfig) UnsubcribeFeed(w http.ResponseWriter, r *http.Request) {
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Couldn't find JWT", err)
@@ -36,8 +35,7 @@ func (c *ApiConfig) SubcribeFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = c.DB.SubcribeFeed(r.Context(), database.SubcribeFeedParams{
-		ID:     uuid.New(),
+	err = c.DB.UnsubcribeFeed(r.Context(), database.UnsubcribeFeedParams{
 		UserID: userID,
 		FeedID: dbFeed.ID,
 	})
@@ -45,5 +43,5 @@ func (c *ApiConfig) SubcribeFeed(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Something when wrong", err)
 		return
 	}
-	respondWithJSON(w, http.StatusOK, "User subcribed to feed")
+	respondWithJSON(w, http.StatusOK, "User unsubcribed to feed")
 }

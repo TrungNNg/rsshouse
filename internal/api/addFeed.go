@@ -88,4 +88,5 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		})
 		log.Println("error adding post: ", err)
 	}
+	respondWithJSON(w, http.StatusOK, "Add feed successfuly")
 }

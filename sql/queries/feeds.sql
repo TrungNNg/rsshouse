@@ -27,3 +27,7 @@ INSERT INTO feeds (
     $10
 )
 RETURNING *;
+
+-- name: GetFeedByFeedLink :one
+SELECT * FROM feeds
+WHERE feed_link = $1;
