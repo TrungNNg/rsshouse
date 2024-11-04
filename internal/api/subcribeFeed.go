@@ -23,16 +23,16 @@ func (c *ApiConfig) SubcribeFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqData := struct {
-		FeedLink string `json:"feed_link"`
+		FeedID uuid.UUID `json:"feed_id"`
 	}{}
 
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	decoder.Decode(&reqData)
 
-	dbFeed, err := c.DB.GetFeedByFeedLink(r.Context(), reqData.FeedLink)
+	dbFeed, err := c.DB.GetFeedByID(r.Context(), reqData.FeedID)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Something when wrong", err)
+		respondWithError(w, http.StatusInternalServerError, "Something went wrong", err)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (c *ApiConfig) SubcribeFeed(w http.ResponseWriter, r *http.Request) {
 		FeedID: dbFeed.ID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Something when wrong", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't subcribe to feed", err)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, "User subcribed to feed")

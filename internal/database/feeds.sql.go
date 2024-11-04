@@ -87,13 +87,13 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 	return i, err
 }
 
-const getFeedByFeedLink = `-- name: GetFeedByFeedLink :one
+const getFeedByID = `-- name: GetFeedByID :one
 SELECT id, created_at, updated_at, title, descrip, feed_link, updated_parsed, lang, img_url, img_title, feed_type, user_id FROM feeds
-WHERE feed_link = $1
+WHERE id = $1
 `
 
-func (q *Queries) GetFeedByFeedLink(ctx context.Context, feedLink string) (Feed, error) {
-	row := q.db.QueryRowContext(ctx, getFeedByFeedLink, feedLink)
+func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getFeedByID, id)
 	var i Feed
 	err := row.Scan(
 		&i.ID,

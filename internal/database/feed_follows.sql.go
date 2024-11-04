@@ -11,6 +11,34 @@ import (
 	"github.com/google/uuid"
 )
 
+const getSubcribedFeed = `-- name: GetSubcribedFeed :many
+SELECT feed_id FROM feed_follows
+WHERE user_id = $1
+`
+
+func (q *Queries) GetSubcribedFeed(ctx context.Context, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := q.db.QueryContext(ctx, getSubcribedFeed, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []uuid.UUID
+	for rows.Next() {
+		var feed_id uuid.UUID
+		if err := rows.Scan(&feed_id); err != nil {
+			return nil, err
+		}
+		items = append(items, feed_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const subcribeFeed = `-- name: SubcribeFeed :exec
 INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
 VALUES ($1, NOW(), NOW(), $2, $3)

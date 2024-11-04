@@ -28,6 +28,6 @@ INSERT INTO feeds (
 )
 RETURNING *;
 
--- name: GetFeedByFeedLink :one
+-- name: GetFeedByID :one
 SELECT * FROM feeds
-WHERE feed_link = $1;
+WHERE id = $1;

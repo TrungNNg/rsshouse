@@ -5,3 +5,7 @@ VALUES ($1, NOW(), NOW(), $2, $3);
 -- name: UnsubcribeFeed :exec
 DELETE FROM feed_follows 
 WHERE user_id = $1 AND feed_id = $2;
+
+-- name: GetSubcribedFeed :many
+SELECT feed_id FROM feed_follows
+WHERE user_id = $1;

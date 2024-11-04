@@ -6,6 +6,7 @@ import (
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
 	"github.com/TrungNNg/rsshouse/internal/database"
+	"github.com/google/uuid"
 )
 
 func (c *ApiConfig) UnsubcribeFeed(w http.ResponseWriter, r *http.Request) {
@@ -22,14 +23,14 @@ func (c *ApiConfig) UnsubcribeFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqData := struct {
-		FeedLink string `json:"feed_link"`
+		FeedID uuid.UUID `json:"feed_id"`
 	}{}
 
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 	decoder.Decode(&reqData)
 
-	dbFeed, err := c.DB.GetFeedByFeedLink(r.Context(), reqData.FeedLink)
+	dbFeed, err := c.DB.GetFeedByID(r.Context(), reqData.FeedID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Something when wrong", err)
 		return
@@ -40,7 +41,7 @@ func (c *ApiConfig) UnsubcribeFeed(w http.ResponseWriter, r *http.Request) {
 		FeedID: dbFeed.ID,
 	})
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Something when wrong", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't unsub from feed", err)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, "User unsubcribed to feed")

@@ -77,8 +77,9 @@ func main() {
 	// authenticated endpoints
 	mux.HandleFunc("GET /api/test", cfg.Test)
 	mux.HandleFunc("POST /api/feeds", cfg.AddFeed)
-	mux.HandleFunc("POST /api/subscribeFeed", cfg.SubcribeFeed)     // need test
-	mux.HandleFunc("POST /api/unsubscribeFeed", cfg.UnsubcribeFeed) // need test
+	mux.HandleFunc("POST /api/subscribe", cfg.SubcribeFeed)
+	mux.HandleFunc("POST /api/unsubscribe", cfg.UnsubcribeFeed) // need test
+	mux.HandleFunc("GET /api/posts", cfg.GetPosts)
 
 	server := &http.Server{
 		Addr:    ":" + port,

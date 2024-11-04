@@ -66,3 +66,45 @@ func (q *Queries) AddPost(ctx context.Context, arg AddPostParams) error {
 	)
 	return err
 }
+
+const getSubcribedPostsOfUser = `-- name: GetSubcribedPostsOfUser :many
+SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.descrip, posts.post_link, posts.published_parsed, posts.img_url, posts.img_title, posts.guid, posts.feed_id FROM posts
+JOIN feed_follows ON posts.feed_id = feed_follows.feed_id
+WHERE feed_follows.user_id = $1
+ORDER BY posts.published_parsed DESC
+`
+
+func (q *Queries) GetSubcribedPostsOfUser(ctx context.Context, userID uuid.UUID) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getSubcribedPostsOfUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Descrip,
+			&i.PostLink,
+			&i.PublishedParsed,
+			&i.ImgUrl,
+			&i.ImgTitle,
+			&i.Guid,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
