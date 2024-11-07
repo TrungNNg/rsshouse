@@ -7,7 +7,7 @@ package database
 
 import (
 	"context"
-	"time"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -20,7 +20,8 @@ INSERT INTO feeds (
     title, 
     descrip, 
     feed_link, 
-    updated_parsed, 
+    updated_parsed,
+    published_parsed, 
     lang, 
     img_url, 
     img_title, 
@@ -38,22 +39,24 @@ INSERT INTO feeds (
     $7,
     $8,
     $9,
-    $10
+    $10,
+    $11
 )
-RETURNING id, created_at, updated_at, title, descrip, feed_link, updated_parsed, lang, img_url, img_title, feed_type, user_id
+RETURNING id, created_at, updated_at, title, descrip, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id
 `
 
 type AddFeedParams struct {
-	ID            uuid.UUID
-	Title         string
-	Descrip       string
-	FeedLink      string
-	UpdatedParsed time.Time
-	Lang          string
-	ImgUrl        string
-	ImgTitle      string
-	FeedType      string
-	UserID        uuid.UUID
+	ID              uuid.UUID
+	Title           string
+	Descrip         string
+	FeedLink        string
+	UpdatedParsed   sql.NullTime
+	PublishedParsed sql.NullTime
+	Lang            string
+	ImgUrl          string
+	ImgTitle        string
+	FeedType        string
+	UserID          uuid.UUID
 }
 
 func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) {
@@ -63,6 +66,7 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		arg.Descrip,
 		arg.FeedLink,
 		arg.UpdatedParsed,
+		arg.PublishedParsed,
 		arg.Lang,
 		arg.ImgUrl,
 		arg.ImgTitle,
@@ -78,6 +82,7 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		&i.Descrip,
 		&i.FeedLink,
 		&i.UpdatedParsed,
+		&i.PublishedParsed,
 		&i.Lang,
 		&i.ImgUrl,
 		&i.ImgTitle,
@@ -88,7 +93,7 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 }
 
 const getFeedByID = `-- name: GetFeedByID :one
-SELECT id, created_at, updated_at, title, descrip, feed_link, updated_parsed, lang, img_url, img_title, feed_type, user_id FROM feeds
+SELECT id, created_at, updated_at, title, descrip, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id FROM feeds
 WHERE id = $1
 `
 
@@ -103,6 +108,7 @@ func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (Feed, error) {
 		&i.Descrip,
 		&i.FeedLink,
 		&i.UpdatedParsed,
+		&i.PublishedParsed,
 		&i.Lang,
 		&i.ImgUrl,
 		&i.ImgTitle,

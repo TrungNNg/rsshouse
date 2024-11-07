@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -46,18 +47,28 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		feedImgTitle, feedImgURL = feed.Image.Title, feed.Image.URL
 	}
 
+	// feed.PublishedTime and feed.UpdatedTime can be nil
+	var feedPublishedTime, feedUpdatedTime sql.NullTime
+	if feed.PublishedParsed != nil {
+		feedPublishedTime = sql.NullTime{Time: *feed.PublishedParsed, Valid: true}
+	}
+	if feed.UpdatedParsed != nil {
+		feedUpdatedTime = sql.NullTime{Time: *feed.UpdatedParsed, Valid: true}
+	}
+
 	// save feed to db
 	dbFeed, err := c.DB.AddFeed(r.Context(), database.AddFeedParams{
-		ID:            uuid.New(),
-		Title:         feed.Title,
-		Descrip:       feed.Description,
-		FeedLink:      feed.FeedLink,
-		UpdatedParsed: time.Now().UTC(),
-		Lang:          feed.Language,
-		ImgUrl:        feedImgURL,
-		ImgTitle:      feedImgTitle,
-		FeedType:      feed.FeedType,
-		UserID:        userID,
+		ID:              uuid.New(),
+		Title:           feed.Title,
+		Descrip:         feed.Description,
+		FeedLink:        feed.FeedLink,
+		UpdatedParsed:   feedUpdatedTime,
+		PublishedParsed: feedPublishedTime,
+		Lang:            feed.Language,
+		ImgUrl:          feedImgURL,
+		ImgTitle:        feedImgTitle,
+		FeedType:        feed.FeedType,
+		UserID:          userID,
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), `duplicate key value violates unique constraint "feeds_feed_link_key"`) {
