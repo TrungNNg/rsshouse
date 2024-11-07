@@ -7,7 +7,7 @@ package database
 
 import (
 	"context"
-	"time"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -19,7 +19,8 @@ INSERT INTO posts (
     updated_at, 
     title, 
     descrip, 
-    post_link, 
+    post_link,
+    updated_parsed,
     published_parsed, 
     img_url, 
     img_title, 
@@ -36,7 +37,8 @@ INSERT INTO posts (
     $6,
     $7,
     $8,
-    $9
+    $9,
+    $10
 )
 `
 
@@ -45,7 +47,8 @@ type AddPostParams struct {
 	Title           string
 	Descrip         string
 	PostLink        string
-	PublishedParsed time.Time
+	UpdatedParsed   sql.NullTime
+	PublishedParsed sql.NullTime
 	ImgUrl          string
 	ImgTitle        string
 	Guid            string
@@ -58,6 +61,7 @@ func (q *Queries) AddPost(ctx context.Context, arg AddPostParams) error {
 		arg.Title,
 		arg.Descrip,
 		arg.PostLink,
+		arg.UpdatedParsed,
 		arg.PublishedParsed,
 		arg.ImgUrl,
 		arg.ImgTitle,
@@ -68,7 +72,7 @@ func (q *Queries) AddPost(ctx context.Context, arg AddPostParams) error {
 }
 
 const getSubcribedPostsOfUser = `-- name: GetSubcribedPostsOfUser :many
-SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.descrip, posts.post_link, posts.published_parsed, posts.img_url, posts.img_title, posts.guid, posts.feed_id FROM posts
+SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.descrip, posts.post_link, posts.updated_parsed, posts.published_parsed, posts.img_url, posts.img_title, posts.guid, posts.feed_id FROM posts
 JOIN feed_follows ON posts.feed_id = feed_follows.feed_id
 WHERE feed_follows.user_id = $1
 ORDER BY posts.published_parsed DESC
@@ -90,6 +94,7 @@ func (q *Queries) GetSubcribedPostsOfUser(ctx context.Context, userID uuid.UUID)
 			&i.Title,
 			&i.Descrip,
 			&i.PostLink,
+			&i.UpdatedParsed,
 			&i.PublishedParsed,
 			&i.ImgUrl,
 			&i.ImgTitle,

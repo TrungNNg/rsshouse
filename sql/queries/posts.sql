@@ -5,7 +5,8 @@ INSERT INTO posts (
     updated_at, 
     title, 
     descrip, 
-    post_link, 
+    post_link,
+    updated_parsed,
     published_parsed, 
     img_url, 
     img_title, 
@@ -22,7 +23,8 @@ INSERT INTO posts (
     $6,
     $7,
     $8,
-    $9
+    $9,
+    $10
 );
 
 -- name: GetSubcribedPostsOfUser :many

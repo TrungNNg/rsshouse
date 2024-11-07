@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
 	"github.com/TrungNNg/rsshouse/internal/database"
@@ -86,12 +85,23 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		if post.Image != nil {
 			postImgTitle, postImgURL = post.Image.Title, post.Image.URL
 		}
+
+		// post.UpdatedParsed and post.PublishedParsed can be nil
+		var postUpdateTime, postPublishedTime sql.NullTime
+		if post.UpdatedParsed != nil {
+			postUpdateTime = sql.NullTime{Time: *post.UpdatedParsed, Valid: true}
+		}
+		if post.PublishedParsed != nil {
+			postPublishedTime = sql.NullTime{Time: *post.PublishedParsed, Valid: true}
+		}
+
 		err = c.DB.AddPost(r.Context(), database.AddPostParams{
 			ID:              uuid.New(),
 			Title:           post.Title,
 			Descrip:         post.Description,
 			PostLink:        post.Link,
-			PublishedParsed: time.Now().UTC(),
+			UpdatedParsed:   postUpdateTime,
+			PublishedParsed: postPublishedTime,
 			ImgUrl:          postImgURL,
 			ImgTitle:        postImgTitle,
 			Guid:            post.GUID,

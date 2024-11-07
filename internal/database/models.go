@@ -42,7 +42,8 @@ type Post struct {
 	Title           string
 	Descrip         string
 	PostLink        string
-	PublishedParsed time.Time
+	UpdatedParsed   sql.NullTime
+	PublishedParsed sql.NullTime
 	ImgUrl          string
 	ImgTitle        string
 	Guid            string
