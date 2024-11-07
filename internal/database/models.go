@@ -17,6 +17,7 @@ type Feed struct {
 	UpdatedAt       time.Time
 	Title           string
 	Descrip         string
+	Link            string
 	FeedLink        string
 	UpdatedParsed   sql.NullTime
 	PublishedParsed sql.NullTime
@@ -33,6 +34,14 @@ type FeedFollow struct {
 	UpdatedAt time.Time
 	UserID    uuid.UUID
 	FeedID    uuid.UUID
+}
+
+type FeedTopic struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	FeedID    uuid.UUID
+	TopicID   uuid.UUID
 }
 
 type Post struct {
@@ -57,6 +66,13 @@ type RefreshToken struct {
 	UserID    uuid.UUID
 	ExpiresAt time.Time
 	RevokedAt sql.NullTime
+}
+
+type Topic struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string
 }
 
 type User struct {

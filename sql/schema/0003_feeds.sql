@@ -5,6 +5,7 @@ CREATE TABLE feeds (
     updated_at TIMESTAMP NOT NULL,
     title TEXT NOT NULL,
     descrip TEXT NOT NULL,
+    link TEXT NOT NULL,
     feed_link TEXT NOT NULL UNIQUE,
     updated_parsed TIMESTAMP,
     published_parsed TIMESTAMP,

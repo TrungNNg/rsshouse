@@ -5,6 +5,7 @@ INSERT INTO feeds (
     updated_at, 
     title, 
     descrip, 
+    link,
     feed_link, 
     updated_parsed,
     published_parsed, 
@@ -26,7 +27,8 @@ INSERT INTO feeds (
     $8,
     $9,
     $10,
-    $11
+    $11,
+    $12
 )
 RETURNING *;
 

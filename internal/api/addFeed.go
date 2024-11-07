@@ -26,6 +26,12 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: when add a feed user also need to pick at least 1 topic and at most
+	// 5 topics that the feed is about. There will be a simple check in front end
+	// but that can not be rely on, so there will be a check in backend as well
+
+	// count topic here
+
 	reqData := struct {
 		URL string `json:"url"`
 	}{}
@@ -60,6 +66,7 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		ID:              uuid.New(),
 		Title:           feed.Title,
 		Descrip:         feed.Description,
+		Link:            feed.Link,
 		FeedLink:        feed.FeedLink,
 		UpdatedParsed:   feedUpdatedTime,
 		PublishedParsed: feedPublishedTime,

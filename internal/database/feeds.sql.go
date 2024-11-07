@@ -19,6 +19,7 @@ INSERT INTO feeds (
     updated_at, 
     title, 
     descrip, 
+    link,
     feed_link, 
     updated_parsed,
     published_parsed, 
@@ -40,15 +41,17 @@ INSERT INTO feeds (
     $8,
     $9,
     $10,
-    $11
+    $11,
+    $12
 )
-RETURNING id, created_at, updated_at, title, descrip, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id
+RETURNING id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id
 `
 
 type AddFeedParams struct {
 	ID              uuid.UUID
 	Title           string
 	Descrip         string
+	Link            string
 	FeedLink        string
 	UpdatedParsed   sql.NullTime
 	PublishedParsed sql.NullTime
@@ -64,6 +67,7 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		arg.ID,
 		arg.Title,
 		arg.Descrip,
+		arg.Link,
 		arg.FeedLink,
 		arg.UpdatedParsed,
 		arg.PublishedParsed,
@@ -80,6 +84,7 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		&i.UpdatedAt,
 		&i.Title,
 		&i.Descrip,
+		&i.Link,
 		&i.FeedLink,
 		&i.UpdatedParsed,
 		&i.PublishedParsed,
@@ -93,7 +98,7 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 }
 
 const getFeedByID = `-- name: GetFeedByID :one
-SELECT id, created_at, updated_at, title, descrip, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id FROM feeds
+SELECT id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id FROM feeds
 WHERE id = $1
 `
 
@@ -106,6 +111,7 @@ func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (Feed, error) {
 		&i.UpdatedAt,
 		&i.Title,
 		&i.Descrip,
+		&i.Link,
 		&i.FeedLink,
 		&i.UpdatedParsed,
 		&i.PublishedParsed,
