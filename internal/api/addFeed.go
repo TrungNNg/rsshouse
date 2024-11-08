@@ -26,7 +26,7 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: when add a feed user also need to pick at least 1 topic and at most
+	// TODO - when add a feed user also need to pick at least 1 topic and at most
 	// 5 topics that the feed is about. There will be a simple check in front end
 	// but that can not be rely on, so there will be a check in backend as well
 
@@ -84,6 +84,10 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Coudn't parse feed url", err)
 		return
 	}
+
+	// TODO: create feed_topics.sql in queries folder
+	// create many and many relationship between feeds and topics table
+	// the frontend will return a list of topcis ids to make relationship
 
 	// save post to db
 	for _, post := range feed.Items {

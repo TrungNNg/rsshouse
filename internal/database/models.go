@@ -68,6 +68,14 @@ type RefreshToken struct {
 	RevokedAt sql.NullTime
 }
 
+type SavedPost struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Title     string
+	PostLink  string
+}
+
 type Topic struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
@@ -81,4 +89,13 @@ type User struct {
 	UpdatedAt      time.Time
 	Username       string
 	HashedPassword string
+}
+
+type UserSavedPost struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	SavedAt     time.Time
+	UserID      uuid.UUID
+	SavedPostID uuid.UUID
 }

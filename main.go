@@ -80,6 +80,7 @@ func main() {
 	mux.HandleFunc("POST /api/subscribe", cfg.SubcribeFeed)
 	mux.HandleFunc("POST /api/unsubscribe", cfg.UnsubcribeFeed)
 	mux.HandleFunc("GET /api/posts", cfg.GetPosts)
+	mux.HandleFunc("POST /api/save", cfg.SavePost) // save post for user, need test
 
 	server := &http.Server{
 		Addr:    ":" + port,
