@@ -38,6 +38,16 @@ func (q *Queries) AddSavedPost(ctx context.Context, arg AddSavedPostParams) (Sav
 	return i, err
 }
 
+const deleteSavedPost = `-- name: DeleteSavedPost :exec
+DELETE FROM saved_posts
+WHERE id = $1
+`
+
+func (q *Queries) DeleteSavedPost(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteSavedPost, id)
+	return err
+}
+
 const getSavedPostByPostLink = `-- name: GetSavedPostByPostLink :one
 SELECT id, created_at, updated_at, title, post_link FROM saved_posts
 WHERE post_link = $1
