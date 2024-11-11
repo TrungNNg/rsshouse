@@ -46,9 +46,11 @@ func (c *ApiConfig) SavePost(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(err, sql.ErrNoRows) {
 		// created new saved post in saved_posts table
 		savedPost, err = c.DB.AddSavedPost(r.Context(), database.AddSavedPostParams{
-			ID:       uuid.New(),
-			Title:    reqData.Title,
-			PostLink: reqData.PostLink,
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			Title:     reqData.Title,
+			PostLink:  reqData.PostLink,
 		})
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "Couldn't create save post", err)
@@ -59,6 +61,8 @@ func (c *ApiConfig) SavePost(w http.ResponseWriter, r *http.Request) {
 	// save post for user
 	err = c.DB.UserSavePost(r.Context(), database.UserSavePostParams{
 		ID:          uuid.New(),
+		CreatedAt:   time.Now().UTC(),
+		UpdatedAt:   time.Now().UTC(),
 		SavedAt:     time.Now().UTC(),
 		UserID:      userID,
 		SavedPostID: savedPost.ID,

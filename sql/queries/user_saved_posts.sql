@@ -8,11 +8,11 @@ INSERT INTO user_saved_posts (
     saved_post_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
     $3,
-    $4
+    $4,
+    $5,
+    $6
 );
 
 -- name: UnsavePost :exec

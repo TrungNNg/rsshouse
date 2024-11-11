@@ -7,8 +7,8 @@ INSERT INTO feed_topics (
     topic_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
-    $3
+    $3,
+    $4,
+    $5
 );

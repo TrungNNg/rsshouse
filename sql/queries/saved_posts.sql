@@ -1,7 +1,7 @@
 -- name: AddSavedPost :one
 INSERT INTO saved_posts (id, created_at, updated_at, title, post_link) 
 VALUES (
-    $1, NOW(), NOW(), $2, $3
+    $1, $2, $3, $4, $5
 )
 RETURNING *;
 

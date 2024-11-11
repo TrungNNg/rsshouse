@@ -26,6 +26,7 @@ type Feed struct {
 	ImgTitle        string
 	FeedType        string
 	UserID          uuid.UUID
+	LastFetchedAt   sql.NullTime
 }
 
 type FeedFollow struct {

@@ -14,8 +14,6 @@ INSERT INTO posts (
     feed_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
     $3,
     $4,
@@ -24,7 +22,9 @@ INSERT INTO posts (
     $7,
     $8,
     $9,
-    $10
+    $10,
+    $11,
+    $12
 );
 
 -- name: GetSubcribedPostsOfUser :many

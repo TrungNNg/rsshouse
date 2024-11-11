@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -41,17 +42,25 @@ func (q *Queries) GetSubcribedFeed(ctx context.Context, userID uuid.UUID) ([]uui
 
 const subcribeFeed = `-- name: SubcribeFeed :exec
 INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
-VALUES ($1, NOW(), NOW(), $2, $3)
+VALUES ($1, $2, $3, $4, $5)
 `
 
 type SubcribeFeedParams struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
-	FeedID uuid.UUID
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	UserID    uuid.UUID
+	FeedID    uuid.UUID
 }
 
 func (q *Queries) SubcribeFeed(ctx context.Context, arg SubcribeFeedParams) error {
-	_, err := q.db.ExecContext(ctx, subcribeFeed, arg.ID, arg.UserID, arg.FeedID)
+	_, err := q.db.ExecContext(ctx, subcribeFeed,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.UserID,
+		arg.FeedID,
+	)
 	return err
 }
 

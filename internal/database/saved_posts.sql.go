@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -14,19 +15,27 @@ import (
 const addSavedPost = `-- name: AddSavedPost :one
 INSERT INTO saved_posts (id, created_at, updated_at, title, post_link) 
 VALUES (
-    $1, NOW(), NOW(), $2, $3
+    $1, $2, $3, $4, $5
 )
 RETURNING id, created_at, updated_at, title, post_link
 `
 
 type AddSavedPostParams struct {
-	ID       uuid.UUID
-	Title    string
-	PostLink string
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Title     string
+	PostLink  string
 }
 
 func (q *Queries) AddSavedPost(ctx context.Context, arg AddSavedPostParams) (SavedPost, error) {
-	row := q.db.QueryRowContext(ctx, addSavedPost, arg.ID, arg.Title, arg.PostLink)
+	row := q.db.QueryRowContext(ctx, addSavedPost,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.PostLink,
+	)
 	var i SavedPost
 	err := row.Scan(
 		&i.ID,

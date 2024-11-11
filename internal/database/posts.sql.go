@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -28,8 +29,6 @@ INSERT INTO posts (
     feed_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
     $3,
     $4,
@@ -38,12 +37,16 @@ INSERT INTO posts (
     $7,
     $8,
     $9,
-    $10
+    $10,
+    $11,
+    $12
 )
 `
 
 type AddPostParams struct {
 	ID              uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 	Title           string
 	Descrip         string
 	PostLink        string
@@ -58,6 +61,8 @@ type AddPostParams struct {
 func (q *Queries) AddPost(ctx context.Context, arg AddPostParams) error {
 	_, err := q.db.ExecContext(ctx, addPost,
 		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 		arg.Title,
 		arg.Descrip,
 		arg.PostLink,

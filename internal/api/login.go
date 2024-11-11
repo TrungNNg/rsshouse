@@ -54,6 +54,8 @@ func (c *ApiConfig) Login(w http.ResponseWriter, r *http.Request) {
 
 	_, err = c.DB.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
 		Token:     refreshToken,
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 		UserID:    dbUser.ID,
 		ExpiresAt: time.Now().UTC().Add(time.Hour * 24 * 60),
 	})

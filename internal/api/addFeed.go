@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
 	"github.com/TrungNNg/rsshouse/internal/database"
@@ -64,6 +65,8 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 	// save feed to db
 	dbFeed, err := c.DB.AddFeed(r.Context(), database.AddFeedParams{
 		ID:              uuid.New(),
+		CreatedAt:       time.Now().UTC(),
+		UpdatedAt:       time.Now().UTC(),
 		Title:           feed.Title,
 		Descrip:         feed.Description,
 		Link:            feed.Link,
@@ -108,6 +111,8 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 
 		err = c.DB.AddPost(r.Context(), database.AddPostParams{
 			ID:              uuid.New(),
+			CreatedAt:       time.Now().UTC(),
+			UpdatedAt:       time.Now().UTC(),
 			Title:           post.Title,
 			Descrip:         post.Description,
 			PostLink:        post.Link,
@@ -120,5 +125,9 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		})
 		log.Println("error adding post: ", err)
 	}
+
+	// TODO: after successguly fetch all post
+	// update fetched_at collumn of the feed to current time
+
 	respondWithJSON(w, http.StatusOK, "Add feed successfuly")
 }

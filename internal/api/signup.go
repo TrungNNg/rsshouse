@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
 	"github.com/TrungNNg/rsshouse/internal/database"
+	"github.com/google/uuid"
 )
 
 func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +21,7 @@ func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	err := decoder.Decode(&reqData)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Can not decode json", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't decode json", err)
 		return
 	}
 
@@ -36,6 +38,9 @@ func (c *ApiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbUser, err := c.DB.CreateUser(r.Context(), database.CreateUserParams{
+		ID:             uuid.New(),
+		CreatedAt:      time.Now().UTC(),
+		UpdatedAt:      time.Now().UTC(),
 		Username:       reqData.Username,
 		HashedPassword: hashedPassword,
 	})

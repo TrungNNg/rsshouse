@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -20,20 +21,28 @@ INSERT INTO feed_topics (
     topic_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
-    $3
+    $3,
+    $4,
+    $5
 )
 `
 
 type AddFeedTopicParams struct {
-	ID      uuid.UUID
-	FeedID  uuid.UUID
-	TopicID uuid.UUID
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	FeedID    uuid.UUID
+	TopicID   uuid.UUID
 }
 
 func (q *Queries) AddFeedTopic(ctx context.Context, arg AddFeedTopicParams) error {
-	_, err := q.db.ExecContext(ctx, addFeedTopic, arg.ID, arg.FeedID, arg.TopicID)
+	_, err := q.db.ExecContext(ctx, addFeedTopic,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.FeedID,
+		arg.TopicID,
+	)
 	return err
 }

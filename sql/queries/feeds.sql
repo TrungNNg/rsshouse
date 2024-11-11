@@ -16,8 +16,6 @@ INSERT INTO feeds (
     user_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
     $3,
     $4,
@@ -28,7 +26,9 @@ INSERT INTO feeds (
     $9,
     $10,
     $11,
-    $12
+    $12,
+    $13,
+    $14
 )
 RETURNING *;
 

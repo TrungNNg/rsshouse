@@ -49,16 +49,18 @@ INSERT INTO user_saved_posts (
     saved_post_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
     $3,
-    $4
+    $4,
+    $5,
+    $6
 )
 `
 
 type UserSavePostParams struct {
 	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 	SavedAt     time.Time
 	UserID      uuid.UUID
 	SavedPostID uuid.UUID
@@ -67,6 +69,8 @@ type UserSavePostParams struct {
 func (q *Queries) UserSavePost(ctx context.Context, arg UserSavePostParams) error {
 	_, err := q.db.ExecContext(ctx, userSavePost,
 		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 		arg.SavedAt,
 		arg.UserID,
 		arg.SavedPostID,

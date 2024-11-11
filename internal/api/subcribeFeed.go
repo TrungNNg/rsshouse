@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/TrungNNg/rsshouse/internal/auth"
 	"github.com/TrungNNg/rsshouse/internal/database"
@@ -37,9 +38,11 @@ func (c *ApiConfig) SubcribeFeed(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = c.DB.SubcribeFeed(r.Context(), database.SubcribeFeedParams{
-		ID:     uuid.New(),
-		UserID: userID,
-		FeedID: dbFeed.ID,
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		UserID:    userID,
+		FeedID:    dbFeed.ID,
 	})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't subcribe to feed", err)

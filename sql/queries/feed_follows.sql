@@ -1,6 +1,6 @@
 -- name: SubcribeFeed :exec
 INSERT INTO feed_follows (id, created_at, updated_at, user_id, feed_id)
-VALUES ($1, NOW(), NOW(), $2, $3);
+VALUES ($1, $2, $3, $4, $5);
 
 -- name: UnsubcribeFeed :exec
 DELETE FROM feed_follows 

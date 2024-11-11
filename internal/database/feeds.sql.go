@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -30,8 +31,6 @@ INSERT INTO feeds (
     user_id
 ) VALUES (
     $1,
-    NOW(),
-    NOW(),
     $2,
     $3,
     $4,
@@ -42,13 +41,17 @@ INSERT INTO feeds (
     $9,
     $10,
     $11,
-    $12
+    $12,
+    $13,
+    $14
 )
-RETURNING id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id
+RETURNING id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id, last_fetched_at
 `
 
 type AddFeedParams struct {
 	ID              uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 	Title           string
 	Descrip         string
 	Link            string
@@ -65,6 +68,8 @@ type AddFeedParams struct {
 func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) {
 	row := q.db.QueryRowContext(ctx, addFeed,
 		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
 		arg.Title,
 		arg.Descrip,
 		arg.Link,
@@ -93,12 +98,13 @@ func (q *Queries) AddFeed(ctx context.Context, arg AddFeedParams) (Feed, error) 
 		&i.ImgTitle,
 		&i.FeedType,
 		&i.UserID,
+		&i.LastFetchedAt,
 	)
 	return i, err
 }
 
 const getFeedByID = `-- name: GetFeedByID :one
-SELECT id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id FROM feeds
+SELECT id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id, last_fetched_at FROM feeds
 WHERE id = $1
 `
 
@@ -120,6 +126,43 @@ func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (Feed, error) {
 		&i.ImgTitle,
 		&i.FeedType,
 		&i.UserID,
+		&i.LastFetchedAt,
+	)
+	return i, err
+}
+
+const markFeedFetched = `-- name: MarkFeedFetched :one
+UPDATE feeds
+SET last_fetched_at = $1,
+updated_at = $1
+WHERE id = $2
+RETURNING id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id, last_fetched_at
+`
+
+type MarkFeedFetchedParams struct {
+	LastFetchedAt sql.NullTime
+	ID            uuid.UUID
+}
+
+func (q *Queries) MarkFeedFetched(ctx context.Context, arg MarkFeedFetchedParams) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, markFeedFetched, arg.LastFetchedAt, arg.ID)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Descrip,
+		&i.Link,
+		&i.FeedLink,
+		&i.UpdatedParsed,
+		&i.PublishedParsed,
+		&i.Lang,
+		&i.ImgUrl,
+		&i.ImgTitle,
+		&i.FeedType,
+		&i.UserID,
+		&i.LastFetchedAt,
 	)
 	return i, err
 }
