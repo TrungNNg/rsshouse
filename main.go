@@ -61,9 +61,11 @@ func main() {
 	fp.UserAgent = "rsshouse"
 
 	cfg := api.ApiConfig{
-		DB:     database.New(db),
-		Secret: os.Getenv("SECRET"),
-		Parser: fp,
+		DB:                          database.New(db),
+		Secret:                      os.Getenv("SECRET"),
+		Parser:                      fp,
+		FetchFeedInterval:           time.Minute * 30,
+		CleanupRefreshTokenInterval: time.Hour * 12,
 	}
 
 	mux := http.NewServeMux()
@@ -89,7 +91,7 @@ func main() {
 	}
 
 	// a background task that clean up expired or revoked refresh token
-	go jobs.CleanUpRefreshToken(&cfg, time.Hour*12)
+	go jobs.CleanUpRefreshToken(&cfg)
 
 	// start the server
 	log.Println("Starting server on :" + port)

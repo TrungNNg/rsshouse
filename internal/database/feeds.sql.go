@@ -131,6 +131,50 @@ func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (Feed, error) {
 	return i, err
 }
 
+const getFeedsToFetch = `-- name: GetFeedsToFetch :many
+SELECT id, created_at, updated_at, title, descrip, link, feed_link, updated_parsed, published_parsed, lang, img_url, img_title, feed_type, user_id, last_fetched_at FROM feeds
+WHERE $1 - last_fetched_at >= interval '1 hour'
+`
+
+func (q *Queries) GetFeedsToFetch(ctx context.Context, lastFetchedAt sql.NullTime) ([]Feed, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedsToFetch, lastFetchedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Feed
+	for rows.Next() {
+		var i Feed
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Descrip,
+			&i.Link,
+			&i.FeedLink,
+			&i.UpdatedParsed,
+			&i.PublishedParsed,
+			&i.Lang,
+			&i.ImgUrl,
+			&i.ImgTitle,
+			&i.FeedType,
+			&i.UserID,
+			&i.LastFetchedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const markFeedFetched = `-- name: MarkFeedFetched :one
 UPDATE feeds
 SET last_fetched_at = $1,
@@ -165,4 +209,57 @@ func (q *Queries) MarkFeedFetched(ctx context.Context, arg MarkFeedFetchedParams
 		&i.LastFetchedAt,
 	)
 	return i, err
+}
+
+const updateFeedByID = `-- name: UpdateFeedByID :exec
+UPDATE feeds
+SET 
+    updated_at = $2,
+    title = $3,
+    descrip = $4,
+    link = $5,
+    feed_link = $6,
+    updated_parsed = $7,
+    published_parsed = $8,
+    lang = $9,
+    img_url = $10,
+    img_title = $11,
+    feed_type = $12,
+    last_fetched_at = $13
+WHERE id = $1
+`
+
+type UpdateFeedByIDParams struct {
+	ID              uuid.UUID
+	UpdatedAt       time.Time
+	Title           string
+	Descrip         string
+	Link            string
+	FeedLink        string
+	UpdatedParsed   sql.NullTime
+	PublishedParsed sql.NullTime
+	Lang            string
+	ImgUrl          string
+	ImgTitle        string
+	FeedType        string
+	LastFetchedAt   sql.NullTime
+}
+
+func (q *Queries) UpdateFeedByID(ctx context.Context, arg UpdateFeedByIDParams) error {
+	_, err := q.db.ExecContext(ctx, updateFeedByID,
+		arg.ID,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.Descrip,
+		arg.Link,
+		arg.FeedLink,
+		arg.UpdatedParsed,
+		arg.PublishedParsed,
+		arg.Lang,
+		arg.ImgUrl,
+		arg.ImgTitle,
+		arg.FeedType,
+		arg.LastFetchedAt,
+	)
+	return err
 }

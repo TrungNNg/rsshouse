@@ -126,8 +126,11 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 		log.Println("error adding post: ", err)
 	}
 
-	// TODO: after successguly fetch all post
-	// update fetched_at collumn of the feed to current time
+	// update feed's fetched_at
+	c.DB.MarkFeedFetched(r.Context(), database.MarkFeedFetchedParams{
+		LastFetchedAt: sql.NullTime{Time: time.Now().UTC(), Valid: true},
+		ID:            dbFeed.ID,
+	})
 
 	respondWithJSON(w, http.StatusOK, "Add feed successfuly")
 }

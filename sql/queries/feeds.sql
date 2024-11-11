@@ -36,9 +36,30 @@ RETURNING *;
 SELECT * FROM feeds
 WHERE id = $1;
 
+-- name: GetFeedsToFetch :many
+SELECT * FROM feeds
+WHERE $1 - last_fetched_at >= interval '1 hour';
+
 -- name: MarkFeedFetched :one
 UPDATE feeds
 SET last_fetched_at = $1,
 updated_at = $1
 WHERE id = $2
 RETURNING *;
+
+-- name: UpdateFeedByID :exec
+UPDATE feeds
+SET 
+    updated_at = $2,
+    title = $3,
+    descrip = $4,
+    link = $5,
+    feed_link = $6,
+    updated_parsed = $7,
+    published_parsed = $8,
+    lang = $9,
+    img_url = $10,
+    img_title = $11,
+    feed_type = $12,
+    last_fetched_at = $13
+WHERE id = $1;

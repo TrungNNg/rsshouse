@@ -8,9 +8,9 @@ import (
 	"github.com/TrungNNg/rsshouse/internal/api"
 )
 
-func CleanUpRefreshToken(c *api.ApiConfig, interval time.Duration) {
-	ticker := time.NewTicker(interval)
-	log.Printf("CleanUpRefreshToken job running every %s\n", interval)
+func CleanUpRefreshToken(c *api.ApiConfig) {
+	ticker := time.NewTicker(c.CleanupRefreshTokenInterval)
+	log.Printf("CleanUpRefreshToken job run every %s\n", c.CleanupRefreshTokenInterval)
 	for {
 		<-ticker.C
 
