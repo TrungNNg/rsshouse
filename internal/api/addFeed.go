@@ -123,7 +123,9 @@ func (c *ApiConfig) AddFeed(w http.ResponseWriter, r *http.Request) {
 			Guid:            post.GUID,
 			FeedID:          dbFeed.ID,
 		})
-		log.Println("error adding post: ", err)
+		if err != nil {
+			log.Println("error adding post: ", err)
+		}
 	}
 
 	// update feed's fetched_at

@@ -76,6 +76,57 @@ func (q *Queries) AddPost(ctx context.Context, arg AddPostParams) error {
 	return err
 }
 
+const deletePostByID = `-- name: DeletePostByID :exec
+DELETE FROM posts
+WHERE id = $1
+`
+
+func (q *Queries) DeletePostByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deletePostByID, id)
+	return err
+}
+
+const getPostsOfFeed = `-- name: GetPostsOfFeed :many
+SELECT id, created_at, updated_at, title, descrip, post_link, updated_parsed, published_parsed, img_url, img_title, guid, feed_id FROM posts
+WHERE feed_id = $1
+`
+
+func (q *Queries) GetPostsOfFeed(ctx context.Context, feedID uuid.UUID) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsOfFeed, feedID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Descrip,
+			&i.PostLink,
+			&i.UpdatedParsed,
+			&i.PublishedParsed,
+			&i.ImgUrl,
+			&i.ImgTitle,
+			&i.Guid,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSubcribedPostsOfUser = `-- name: GetSubcribedPostsOfUser :many
 SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.descrip, posts.post_link, posts.updated_parsed, posts.published_parsed, posts.img_url, posts.img_title, posts.guid, posts.feed_id FROM posts
 JOIN feed_follows ON posts.feed_id = feed_follows.feed_id
@@ -117,4 +168,48 @@ func (q *Queries) GetSubcribedPostsOfUser(ctx context.Context, userID uuid.UUID)
 		return nil, err
 	}
 	return items, nil
+}
+
+const updatePostByGuid = `-- name: UpdatePostByGuid :exec
+UPDATE posts
+SET 
+    updated_at = $1,
+    title = $2,
+    descrip = $3,
+    post_link = $4,
+    updated_parsed = $5,
+    published_parsed = $6,
+    img_url = $7,
+    img_title = $8,
+    feed_id = $9
+WHERE guid = $10
+`
+
+type UpdatePostByGuidParams struct {
+	UpdatedAt       time.Time
+	Title           string
+	Descrip         string
+	PostLink        string
+	UpdatedParsed   sql.NullTime
+	PublishedParsed sql.NullTime
+	ImgUrl          string
+	ImgTitle        string
+	FeedID          uuid.UUID
+	Guid            string
+}
+
+func (q *Queries) UpdatePostByGuid(ctx context.Context, arg UpdatePostByGuidParams) error {
+	_, err := q.db.ExecContext(ctx, updatePostByGuid,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.Descrip,
+		arg.PostLink,
+		arg.UpdatedParsed,
+		arg.PublishedParsed,
+		arg.ImgUrl,
+		arg.ImgTitle,
+		arg.FeedID,
+		arg.Guid,
+	)
+	return err
 }
