@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const addFeed = `-- name: AddFeed :one
@@ -129,6 +130,93 @@ func (q *Queries) GetFeedByID(ctx context.Context, id uuid.UUID) (Feed, error) {
 		&i.LastFetchedAt,
 	)
 	return i, err
+}
+
+const getFeedsByTopicID = `-- name: GetFeedsByTopicID :many
+SELECT DISTINCT feeds.id, feeds.created_at, feeds.updated_at, feeds.title, feeds.descrip, feeds.link, feeds.feed_link, feeds.updated_parsed, feeds.published_parsed, feeds.lang, feeds.img_url, feeds.img_title, feeds.feed_type, feeds.user_id, feeds.last_fetched_at, COUNT(feed_follows.user_id) AS follower_count
+FROM feeds
+JOIN feed_topics ON feeds.id = feed_topics.feed_id
+LEFT JOIN feed_follows ON feeds.id = feed_follows.feed_id
+WHERE feed_topics.topic_id = ANY($1::UUID[])
+  AND (feeds.lang = $2 OR $2 = '')
+  AND (feeds.feed_type = $3 OR $3 = '')
+GROUP BY feeds.id
+ORDER BY follower_count DESC, feeds.created_at DESC
+OFFSET $4
+LIMIT $5
+`
+
+type GetFeedsByTopicIDParams struct {
+	Column1  []uuid.UUID
+	Lang     string
+	FeedType string
+	Offset   int32
+	Limit    int32
+}
+
+type GetFeedsByTopicIDRow struct {
+	ID              uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	Title           string
+	Descrip         string
+	Link            string
+	FeedLink        string
+	UpdatedParsed   sql.NullTime
+	PublishedParsed sql.NullTime
+	Lang            string
+	ImgUrl          string
+	ImgTitle        string
+	FeedType        string
+	UserID          uuid.UUID
+	LastFetchedAt   sql.NullTime
+	FollowerCount   int64
+}
+
+func (q *Queries) GetFeedsByTopicID(ctx context.Context, arg GetFeedsByTopicIDParams) ([]GetFeedsByTopicIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFeedsByTopicID,
+		pq.Array(arg.Column1),
+		arg.Lang,
+		arg.FeedType,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeedsByTopicIDRow
+	for rows.Next() {
+		var i GetFeedsByTopicIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Descrip,
+			&i.Link,
+			&i.FeedLink,
+			&i.UpdatedParsed,
+			&i.PublishedParsed,
+			&i.Lang,
+			&i.ImgUrl,
+			&i.ImgTitle,
+			&i.FeedType,
+			&i.UserID,
+			&i.LastFetchedAt,
+			&i.FollowerCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getFeedsToFetch = `-- name: GetFeedsToFetch :many

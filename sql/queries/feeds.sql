@@ -63,3 +63,16 @@ SET
     feed_type = $12,
     last_fetched_at = $13
 WHERE id = $1;
+
+-- name: GetFeedsByTopicID :many
+SELECT DISTINCT feeds.*, COUNT(feed_follows.user_id) AS follower_count
+FROM feeds
+JOIN feed_topics ON feeds.id = feed_topics.feed_id
+LEFT JOIN feed_follows ON feeds.id = feed_follows.feed_id
+WHERE feed_topics.topic_id = ANY($1::UUID[])
+  AND (feeds.lang = $2 OR $2 = '')
+  AND (feeds.feed_type = $3 OR $3 = '')
+GROUP BY feeds.id
+ORDER BY follower_count DESC, feeds.created_at DESC
+OFFSET $4
+LIMIT $5;
