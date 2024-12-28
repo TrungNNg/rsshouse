@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -8,7 +9,7 @@ import (
 
 func (app *application) Serve() error {
 	srv := http.Server{
-		Addr:         ":" + app.config.port,
+		Addr:         fmt.Sprintf(":%d", app.config.port),
 		Handler:      app.route(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Second * 5,
