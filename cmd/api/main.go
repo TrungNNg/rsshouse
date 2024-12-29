@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/lib/pq"
 	"rsshouse.trungnng.github.io/internal/data"
+	"rsshouse.trungnng.github.io/internal/mailer"
 )
 
 type config struct {
@@ -21,12 +22,20 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  time.Duration
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	config *config
 	logger *slog.Logger
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func (app *application) test(w http.ResponseWriter, r *http.Request) {
@@ -37,10 +46,19 @@ func (app *application) test(w http.ResponseWriter, r *http.Request) {
 func main() {
 	var cfg config
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("RSSHOUSE_DB_DSN"), "PostgresSQL DSN")
+
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.DurationVar(&cfg.db.maxIdleTime, "db-max-idle-time", 15*time.Minute, "PostgreSQL max connection idle time")
+
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "5e7d3ccb07324a", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "aadce764eb75ea", "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Rsshouse <no-reply@rsshouse.trungnng.github.io>", "SMTP sender")
+
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -58,6 +76,7 @@ func main() {
 		config: &cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	err = app.Serve()
