@@ -10,6 +10,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"rsshouse.trungnng.github.io/internal/data"
 )
 
 type config struct {
@@ -25,7 +26,7 @@ type config struct {
 type application struct {
 	config *config
 	logger *slog.Logger
-	db     *sql.DB
+	models data.Models
 }
 
 func (app *application) test(w http.ResponseWriter, r *http.Request) {
@@ -50,12 +51,13 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+
 	logger.Info("database connection pool established")
 
 	app := &application{
 		config: &cfg,
 		logger: logger,
-		db:     db,
+		models: data.NewModels(db),
 	}
 
 	err = app.Serve()

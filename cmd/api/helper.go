@@ -6,8 +6,64 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
+
+	"github.com/julienschmidt/httprouter"
 )
+
+// Envelope type for JSON response.
+type envelope map[string]any
+
+// Retrieve the "id" URL parameter from the current request context.
+// Return empty string if no id param found.
+func (app *application) readIDParam(r *http.Request) (string, error) {
+	params := httprouter.ParamsFromContext(r.Context())
+
+	id := params.ByName("id")
+
+	idRX := regexp.MustCompile(`^\S+$`)
+	if !idRX.MatchString(id) {
+		return "", errors.New("invalid id param pattern")
+	}
+
+	return id, nil
+}
+
+// writeJSON sends a JSON response to the client.
+//
+// Parameters:
+// - w: The http.ResponseWriter where the response will be written.
+// - status: The HTTP status code for the response.
+// - data: The data to encode into the JSON response body.
+// - headers: A map of additional HTTP headers to include in the response.
+//
+// Returns:
+// - An error if encoding the data to JSON fails or writing to the ResponseWriter encounters an issue.
+func (app *application) writeJSON(
+	w http.ResponseWriter,
+	status int,
+	data envelope,
+	headers http.Header,
+) error {
+	js, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	// Add response's headers
+	for key, value := range headers {
+		w.Header()[key] = value
+	}
+
+	// Add the "Content-Type: application/json" header, then write the status code and
+	// JSON response.
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	w.Write(js)
+
+	return nil
+}
 
 // readJSON reads and decodes a JSON request body into the specified destination `dst`.
 // It includes validation to ensure the request body adheres to expected size and format constraints.
